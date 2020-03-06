@@ -1,14 +1,14 @@
 import React from "react";
 import { Route } from "react-router-dom";
 import { connect } from "react-redux";
+  import {
+    firestore,
+    convertCollectionsSnapshotToMap
+  } from "../../firebase/firebase.utils";
 import { updateCollections } from "../../redux/shop/shop.actions";
 import WithSpinner from "../../components/with-spinner/with-spinner.component";
 import CollectionsOverview from "../../components/collection-overview/collection-overview.component";
 import CollectionPage from "../collection/collection.component";
-import {
-  firestore,
-  convertCollectionsSnapshotToMap
-} from "../../firebase/firebase.utils";
 
 const CollectionsOverviewWithSpinner = WithSpinner(CollectionsOverview);
 const CollectionPageWithSpinner = WithSpinner(CollectionPage);
@@ -20,12 +20,20 @@ class ShopPage extends React.Component {
   componentDidMount() {
     const { updateCollections } = this.props;
     const collectionRef = firestore.collection("collections");
-    collectionRef.onSnapshot(async snapshot => {
+
+    collectionRef.get().then(snapshot => {
       const collectionsMap = convertCollectionsSnapshotToMap(snapshot);
       updateCollections(collectionsMap);
       this.setState({ loading: false });
     });
+
+    // fetch(
+    //   "https://firestore.googleapis.com/v1/projects/crwn-db-fce6d/databases/(default)/documents/collections"
+    // )
+    //   .then(response => response.json())
+    //   .then(collections => console.log(collections));
   }
+
   render() {
     const { match } = this.props;
     const { loading } = this.state;
